@@ -1,0 +1,135 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Data;
+using System.Configuration;
+
+public partial class gestQ : System.Web.UI.Page
+{
+    string ConnectionString = ConfigurationManager.ConnectionStrings["n1"].ConnectionString;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        Label3.Text = Request.QueryString["idEx"];
+        if (!IsPostBack)
+        {
+            PopulateGridview();
+        }
+    }
+
+    void PopulateGridview()
+    {
+        DataTable dtbl = new DataTable();
+        using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+        {
+
+            sqlCon.Open();
+            SqlDataAdapter sqlDa = new SqlDataAdapter("select * from question where idEx='" + Label3.Text + "'", sqlCon);
+
+            sqlDa.Fill(dtbl);
+
+        }
+        if (dtbl.Rows.Count > 0)
+        {
+            gr1.DataSource = dtbl;
+            gr1.DataBind();
+        }
+        else
+        {
+            dtbl.Rows.Add(dtbl.NewRow());
+            gr1.DataSource = dtbl;
+            gr1.DataBind();
+            gr1.Rows[0].Cells.Clear();
+            gr1.Rows[0].Cells.Add(new TableCell());
+            gr1.Rows[0].Cells[0].ColumnSpan = dtbl.Columns.Count;
+            gr1.Rows[0].Cells[0].Text = "aucun Question ...!";
+            gr1.Rows[0].Cells[0].HorizontalAlign = HorizontalAlign.Center;
+
+
+
+        }
+    }
+
+    protected void gr1_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName.Equals("Addnew"))
+        {
+            using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+            {
+                sqlCon.Open();
+                string query = "insert into question (numQ,bareme,nomQ,idEx) values (@numQ,@bareme,@nomQ,"+Label3.Text+") ";
+                SqlCommand sqlCmd = new SqlCommand(query, sqlCon);
+                sqlCmd.Parameters.AddWithValue("@numQ", (gr1.FooterRow.FindControl("TxtnumQFooter") as TextBox).Text.Trim());
+                sqlCmd.Parameters.AddWithValue("@nomQ", (gr1.FooterRow.FindControl("TxtnomQFooter") as TextBox).Text.Trim());
+                sqlCmd.Parameters.AddWithValue("@bareme", (gr1.FooterRow.FindControl("TxtbaremeFooter") as TextBox).Text.Trim());
+                sqlCmd.ExecuteNonQuery();
+                PopulateGridview();
+                lblSucessMessage.Text = "neauveau ligne ajoutée";
+                lblErrorMessage.Text = "";
+
+            }
+
+        }
+    }
+
+    protected void gr1_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        gr1.EditIndex = e.NewEditIndex;
+        PopulateGridview();
+    }
+
+    protected void gr1_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        gr1.EditIndex = -1;
+        PopulateGridview();
+    }
+
+    protected void gr1_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        
+        SqlConnection con = new SqlConnection();
+
+        Response.Write("islem" + (gr1.Rows[e.RowIndex].FindControl("TxtnomQ") as TextBox).Text.Trim());
+        con.ConnectionString= ConfigurationManager.ConnectionStrings["n1"].ConnectionString;
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("SELECT idQ FROM question where nomQ = '"+ (gr1.Rows[e.RowIndex].FindControl("TxtnomQ") as TextBox).Text.Trim() + "'", con))
+        {
+            cmd.CommandType = CommandType.Text;
+
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                string numF = dr["idQ"].ToString();
+                Response.Write("num Formation" + numF);
+                lidQ.Text =numF;
+
+                //numF.Text = nomF;
+            }
+        }
+
+        con.Close();
+        using (SqlConnection sqlCon = new SqlConnection(ConnectionString))
+        {
+            sqlCon.Open();
+            string query = "update question set bareme=@bareme,nomQ=@nomQ where idQ='"+lidQ.Text+"'";
+            SqlCommand sqlCmd = new SqlCommand(query, sqlCon);
+            //sqlCmd.Parameters.AddWithValue("@numQ", (gr1.Rows[e.RowIndex].FindControl("TxtnumQ") as TextBox).Text.Trim());
+            sqlCmd.Parameters.AddWithValue("@nomQ", (gr1.Rows[e.RowIndex].FindControl("TxtnomQ") as TextBox).Text.Trim());
+            sqlCmd.Parameters.AddWithValue("@bareme", (gr1.Rows[e.RowIndex].FindControl("Txtbareme") as TextBox).Text.Trim());
+
+            sqlCmd.Parameters.AddWithValue("@id", Convert.ToInt32(gr1.DataKeys[e.RowIndex].Value.ToString()));
+           
+            sqlCmd.ExecuteNonQuery();
+            gr1.EditIndex = -1;
+            PopulateGridview();
+            lblSucessMessage.Text = "neauveau ligne modifié";
+            lblErrorMessage.Text = "";
+
+        }
+    }
+
+
+}

@@ -1,0 +1,61 @@
+﻿
+
+#formulaire {
+margin:auto;
+}
+
+.mc_text {
+    background-color: antiquewhite;
+}
+.labstyle {
+    font-weight: bold;
+}
+
+.imposition_css1 {
+    background-color: antiquewhite;
+    text-decoration: none;
+    border-color: black;
+    border-style: ridge;
+    border-width: 0.5px;
+    display: block;
+}
+.linkcss1 {
+    background-color: antiquewhite;
+    text-decoration: none;
+    border-color: black;
+    border-style: ridge;
+    border-width: 0.5px;
+    display: block;
+}
+
+.pdfshow {
+    background-color: antiquewhite;
+    text-decoration: none;
+    border-color: black;
+    border-style: ridge;
+    border-width: 0.5px;
+    display: block;
+    overflow-y: scroll;
+}
+
+.items {
+    text-align: center;
+}
+
+.myimge {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    display: block;
+    padding-bottom: 10px
+}
+.button1{
+    margin-left:20%;
+}
+.button {
+    margin-left: 25%;
+}
+.pub1 {
+
+    
+}
